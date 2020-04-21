@@ -16,7 +16,7 @@ export default async function ({ config }: Dependencies) {
   const commandFiles = await glob(commandDir + '**/*.js')
   const commands = await Promise.all<Command>(commandFiles.map(async commandFile => {
     const command: Command = await import(commandFile)
-    command.run = command.createRun({/*Inject Dependencies*/})
+    command.run = command.createRun({ config })
     return command
   }))
 
