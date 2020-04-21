@@ -9,14 +9,14 @@ interface Command {
   requiredParameters?: string[]
 }
 
-export default async function () {
+export default async function ({ config }: Dependencies) {
   const client = new Discord.Client()
 
   const commandDir = path.join(__dirname, 'commands')
   const commandFiles = await glob(commandDir + '**/*.js')
   const commands = await Promise.all<Command>(commandFiles.map(async commandFile => {
     const command: Command = await import(commandFile)
-    command.run = command.createRun({/*Inject Dependencies*/})
+    command.run = command.createRun({ config })
     return command
   }))
 
@@ -43,7 +43,7 @@ export default async function () {
     }
   })
 
-  await client.login('Njc5OTI5NzI2MzE5NzIyNTY1.XlSt-A.skPOkUSp_DaRrTrgnY5JTSSMk40')
+  await client.login(config.CLIENT_TOKEN)
 
   return client
 }
