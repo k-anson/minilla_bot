@@ -1,0 +1,25 @@
+{
+  "name": "minilla_bot",
+  "version": "0.1.0",
+  "description": "Minilla Discord Bot",
+  "author": "Kyle Anson",
+  "license": "ISC",
+  "scripts": {
+    "build": "rimraf ./dist tsc",
+    "dev": "ts-node-dev --respawn --transpileOnly ./src",
+    "start": "node ./dist"
+  },
+  "dependencies": {
+    "discord.js": "^11.5.1",
+    "glob": "^7.1.6",
+    "glob-promise": "^3.4.0",
+    "mysql2": "^2.1.0",
+    "typeorm": "^0.2.24"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.2",
+    "rimraf": "^3.0.2",
+    "ts-node-dev": "^1.0.0-pre.44",
+    "typescript": "^3.8.3"
+  }
+}
