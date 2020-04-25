@@ -4,19 +4,17 @@ import glob from 'glob-promise'
 
 interface Command {
   startsWith: string
-  createRun: ({}: Dependencies) => (message: Discord.Message) => void
-  run: (message: Discord.Message) => void
+  run: ({}: Dependencies) => (message: Discord.Message) => void
   requiredParameters?: string[]
 }
 
-export default async function () {
+export default async function ({ config }: Dependencies) {
   const client = new Discord.Client()
 
   const commandDir = path.join(__dirname, 'commands')
-  const commandFiles = await glob(commandDir + '**/*.js')
+  const commandFiles = await glob(commandDir + '**/*.ts')
   const commands = await Promise.all<Command>(commandFiles.map(async commandFile => {
     const command: Command = await import(commandFile)
-    command.run = command.createRun({/*Inject Dependencies*/})
     return command
   }))
 
@@ -29,8 +27,8 @@ export default async function () {
     if (!message.guild) return
 
     // Run through each command
+    const [startsWith, ...parameters] = message.content.split(' ')
     for (const command of commands) {
-      const [startsWith, ...parameters] = message.content.split(' ')
       if (startsWith === command.startsWith) {
         if (command.requiredParameters) {
           const requiredParameters = parameters.slice(0, command.requiredParameters.length)
@@ -38,12 +36,12 @@ export default async function () {
             continue
           }
         }
-        command.run(message)
+        command.run({ config })(message)
       }
     }
   })
 
-  await client.login('Njc5OTI5NzI2MzE5NzIyNTY1.XlSt-A.skPOkUSp_DaRrTrgnY5JTSSMk40')
+  await client.login(config.CLIENT_TOKEN)
 
   return client
 }

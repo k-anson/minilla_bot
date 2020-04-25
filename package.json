@@ -1,6 +1,6 @@
 {
   "name": "minilla_bot",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Minilla Discord Bot",
   "author": "Kyle Anson",
   "license": "ISC",
@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "discord.js": "^11.5.1",
+    "eznv": "^1.2.0",
     "glob": "^7.1.6",
     "glob-promise": "^3.4.0",
     "mysql2": "^2.1.0",

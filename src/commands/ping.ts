@@ -1,8 +1,8 @@
 import Discord from 'discord.js'
 
-export default {
-  startsWith: '!ping',
-  run: () => function (message: Discord.Message) {
-    message.channel.send('pong')
-  }
+const startsWith = '!ping'
+const run = ({ config }: Dependencies) => async (message: Discord.Message) => {
+  await message.channel.send('pong')
 }
+
+export { startsWith, run }
