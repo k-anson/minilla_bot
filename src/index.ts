@@ -26,13 +26,13 @@ async function main () {
 
 process.on('SIGINT', async function () {
   console.log('Caught interruption signal')
-  console.log('Destroying client')
+  console.log('Destroying Client')
   if (client) await client.destroy()
   process.exit(0)
 })
 
 main().catch(async err => {
   console.error(err)
-  console.log('destroying client')
+  console.log('Destroying Client')
   if (client) await client.destroy()
 })
