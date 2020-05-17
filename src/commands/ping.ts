@@ -1,8 +1,13 @@
 import Discord from 'discord.js'
 
-const startsWith = '!ping'
-const run = ({ config }: Dependencies) => async (message: Discord.Message) => {
-  await message.channel.send('pong')
+export = {
+  startsWith: '!ping',
+  tooltip: '!ping',
+  execute: ({ config }: Dependencies) => async (message: Discord.Message) => {
+    try {
+      await message.channel.send('Pong!')
+    } catch (error) {
+      console.log('Discord message error:', error)
+    }
+  }
 }
-
-export { startsWith, run }
