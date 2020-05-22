@@ -17,7 +17,7 @@ export default async function ({ config }: Dependencies) {
 
     const [startsWith, ...args] = message.content.split(' ')
     // Pull out array of commands for startsWith string
-    const commands = commandMap[startsWith.toLowerCase()]
+    const commands = commandMap[startsWith.toLowerCase()] || []
     for (const command of commands) {
       // Ensure message matches command options
       let options: string[] = []
