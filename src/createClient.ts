@@ -1,11 +1,12 @@
 import Discord from 'discord.js'
+import EmojiRegex from 'emoji-regex'
 
 import loadCommands from './loadCommands'
-import { channelRegex, userRegex, emojiRegex } from './utils/regex'
+import { channelRegex, userRegex, guildEmojiRegex } from './utils/regex'
 
 export default async function ({ config }: Dependencies) {
-  const commandMap = await loadCommands()
   const client = new Discord.Client()
+  const commandMap = await loadCommands()
 
   client.on('ready', () => {
     console.log(`Logged in as ${client.user.tag}`)
@@ -64,8 +65,11 @@ export default async function ({ config }: Dependencies) {
                 if (!client.users.get(userRegexArray[1])) invalidCommand = true
                 break
               case Discord.Emoji:
-                const emojiRegexArray = emojiRegex.exec(parameter) || []
-                if (!client.emojis.get(emojiRegexArray[1])) invalidCommand = true
+                const emojiRegex = EmojiRegex()
+                const guildEmojiRegexArray = guildEmojiRegex.exec(parameter) || []
+                if (!client.emojis.get(guildEmojiRegexArray[1]) && !emojiRegex.test(parameter)) {
+                  invalidCommand = true
+                }
                 break
             }
             if (invalidCommand) break
