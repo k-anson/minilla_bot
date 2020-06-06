@@ -36,6 +36,7 @@ export default async function ({ config }: Dependencies) {
 
       // If options match up
       if (matches === options.length) {
+        const parsedParams: { [key: string]: any } = {}
         let parameters: string[] = []
         if (command.requiredParameters) {
           parameters = args.slice(options.length, command.requiredParameters.length)
@@ -43,40 +44,58 @@ export default async function ({ config }: Dependencies) {
           for (let i = 0; i < parameters.length; i++) {
             const parameter = parameters[i]
             const requiredParameter = command.requiredParameters[i]
+            const requiredParameterName = requiredParameter[0]
+            const requiredParameterType = requiredParameter[1]
 
-            // Validate types
-            switch (requiredParameter[1]) {
+            // Validate types and parse values
+            let parsedParam
+            switch (requiredParameterType) {
               case 'string':
-                if (typeof parameter !== 'string') invalidCommand = true
+                if (typeof parameter !== 'string') {
+                  invalidCommand = true
+                  break
+                }
+                parsedParam = parameter
                 break
               case 'number':
-                if (typeof parameter !== 'number') invalidCommand = true
-                break
-              case 'object':
-                if (typeof parameter !== 'object') invalidCommand = true
+                if (typeof parameter !== 'number') {
+                  invalidCommand = true
+                  break
+                }
+                parsedParam = Number.parseInt(parameter)
                 break
               // Discord types
               case Discord.Channel:
                 const channelRegexArray = channelRegex.exec(parameter) || []
-                if (!client.channels.get(channelRegexArray[1])) invalidCommand = true
+                parsedParam = client.channels.get(channelRegexArray[1])
+                if (!parsedParam) invalidCommand = true
                 break
               case Discord.User:
                 const userRegexArray = userRegex.exec(parameter) || []
-                if (!client.users.get(userRegexArray[1])) invalidCommand = true
+                parsedParam = client.users.get(userRegexArray[1])
+                if (!parsedParam) invalidCommand = true
                 break
               case Discord.Emoji:
                 const emojiRegex = EmojiRegex()
                 const guildEmojiRegexArray = guildEmojiRegex.exec(parameter) || []
-                if (!client.emojis.get(guildEmojiRegexArray[1]) && !emojiRegex.test(parameter)) {
-                  invalidCommand = true
-                }
+                // Check guild emojis
+                parsedParam = client.emojis.get(guildEmojiRegexArray[1])
+                // Check unicode emojis
+                parsedParam = emojiRegex.exec(parameter)
+                if (parsedParam) parsedParam = parsedParam[0]
+                if (!parsedParam) invalidCommand = true
                 break
             }
-            if (invalidCommand) break
+            // Add validated and parsed value to parsedParam object
+            if (invalidCommand) {
+              break
+            } else {
+              parsedParams[requiredParameterName] = parsedParam
+            }
           }
           if (!invalidCommand) {
             try {
-              await command.execute({ config })(message)
+              await command.execute({ config })(message, parsedParams)
             } catch (error) {
               console.error('Command execution error:', error)
             }
@@ -84,7 +103,7 @@ export default async function ({ config }: Dependencies) {
           }
         } else {
           try {
-            await command.execute({ config })(message)
+            await command.execute({ config })(message, parsedParams)
           } catch (error) {
             console.error('Command execution error:', error)
           }

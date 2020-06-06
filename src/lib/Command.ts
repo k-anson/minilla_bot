@@ -7,5 +7,5 @@ export interface Command {
   tooltip: string
   requiredOptions?: string[]
   requiredParameters?: RequiredParameter[]
-  execute: ({}: Dependencies) => (message: Message) => Promise<void>
+  execute: ({}: Dependencies) => (message: Message, params?: { [key: string]: any }) => Promise<void>
 }
