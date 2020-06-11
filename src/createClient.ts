@@ -9,7 +9,11 @@ export default async function ({ config }: Dependencies) {
   const commandMap = await loadCommands()
 
   client.on('ready', () => {
-    console.log(`Logged in as ${client.user.tag}`)
+    if (client.user) {
+      console.log(`Logged in as ${client.user.tag}`)
+    } else {
+      console.log('Client ready without User')
+    }
   })
 
   client.on('message', async message => {
@@ -39,7 +43,7 @@ export default async function ({ config }: Dependencies) {
         const parsedParams: { [key: string]: any } = {}
         let parameters: string[] = []
         if (command.requiredParameters) {
-          parameters = args.slice(options.length, command.requiredParameters.length)
+          parameters = args.slice(options.length, command.requiredParameters.length + 1)
           let invalidCommand = false
           for (let i = 0; i < parameters.length; i++) {
             const parameter = parameters[i]
@@ -65,9 +69,9 @@ export default async function ({ config }: Dependencies) {
                 parsedParam = Number.parseInt(parameter)
                 break
               // Discord types
-              case Discord.Channel:
+              case Discord.TextChannel:
                 const channelRegexArray = channelRegex.exec(parameter) || []
-                parsedParam = client.channels.get(channelRegexArray[1])
+                parsedParam = message.guild.channels.resolve(channelRegexArray[1])
                 if (!parsedParam) invalidCommand = true
                 break
               case Discord.User:
@@ -79,10 +83,10 @@ export default async function ({ config }: Dependencies) {
                 const emojiRegex = EmojiRegex()
                 const guildEmojiRegexArray = guildEmojiRegex.exec(parameter) || []
                 // Check guild emojis
-                parsedParam = client.emojis.get(guildEmojiRegexArray[1])
+                parsedParam = client.emojis.resolve(guildEmojiRegexArray[1])
                 // Check unicode emojis
-                parsedParam = emojiRegex.exec(parameter)
-                if (parsedParam) parsedParam = parsedParam[0]
+                const parsedRegex = emojiRegex.exec(parameter)
+                if (parsedRegex) parsedParam = parsedRegex[0]
                 if (!parsedParam) invalidCommand = true
                 break
             }
