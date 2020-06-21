@@ -55,46 +55,41 @@ export default async function ({ config }: Dependencies) {
             let parsedParam
             switch (requiredParameterType) {
               case 'string':
-                if (typeof parameter !== 'string') {
-                  invalidCommand = true
-                  break
+                if (typeof parameter === 'string') {
+                  parsedParam = parameter
                 }
-                parsedParam = parameter
                 break
               case 'number':
-                if (typeof parameter !== 'number') {
-                  invalidCommand = true
-                  break
+                if (typeof parameter === 'number') {
+                  parsedParam = Number.parseInt(parameter)
                 }
-                parsedParam = Number.parseInt(parameter)
                 break
               // Discord types
               case Discord.TextChannel:
                 const channelRegexArray = channelRegex.exec(parameter) || []
                 parsedParam = message.guild.channels.resolve(channelRegexArray[1])
-                if (!parsedParam) invalidCommand = true
                 break
               case Discord.User:
                 const userRegexArray = userRegex.exec(parameter) || []
-                parsedParam = client.users.get(userRegexArray[1])
-                if (!parsedParam) invalidCommand = true
+                parsedParam = client.users.resolve(userRegexArray[1])
                 break
               case Discord.Emoji:
-                const emojiRegex = EmojiRegex()
-                const guildEmojiRegexArray = guildEmojiRegex.exec(parameter) || []
                 // Check guild emojis
+                const guildEmojiRegexArray = guildEmojiRegex.exec(parameter) || []
                 parsedParam = client.emojis.resolve(guildEmojiRegexArray[1])
                 // Check unicode emojis
+                const emojiRegex = EmojiRegex()
                 const parsedRegex = emojiRegex.exec(parameter)
-                if (parsedRegex) parsedParam = parsedRegex[0]
-                if (!parsedParam) invalidCommand = true
+                if (!parsedParam && parsedRegex) parsedParam = parsedRegex[0]
                 break
             }
             // Add validated and parsed value to parsedParam object
-            if (invalidCommand) {
-              break
-            } else {
+            if (parsedParam) {
               parsedParams[requiredParameterName] = parsedParam
+            } else {
+              // Exit invalid command
+              invalidCommand = true
+              break
             }
           }
           if (!invalidCommand) {
