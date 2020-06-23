@@ -1,4 +1,11 @@
-import { Message } from "discord.js";
+import { Message, Guild } from "discord.js";
+
+declare global {
+  interface DiscordObjects {
+    message: Message
+    guild: Guild
+  }
+}
 
 export type RequiredParameter = [string, any]
 
@@ -7,5 +14,5 @@ export interface Command {
   tooltip: string
   requiredOptions?: string[]
   requiredParameters?: RequiredParameter[]
-  execute: ({}: Dependencies) => (message: Message, params?: { [key: string]: any }) => Promise<void>
+  execute: ({}: Dependencies) => ({}: DiscordObjects, params?: { [key: string]: any }) => Promise<void>
 }

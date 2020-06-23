@@ -94,7 +94,7 @@ export default async function ({ config }: Dependencies) {
           }
           if (!invalidCommand) {
             try {
-              await command.execute({ config })(message, parsedParams)
+              await command.execute({ config })({ message, guild: message.guild }, parsedParams)
             } catch (error) {
               console.error('Command execution error:', error)
             }
@@ -102,7 +102,7 @@ export default async function ({ config }: Dependencies) {
           }
         } else {
           try {
-            await command.execute({ config })(message, parsedParams)
+            await command.execute({ config })({ message, guild: message.guild }, parsedParams)
           } catch (error) {
             console.error('Command execution error:', error)
           }
