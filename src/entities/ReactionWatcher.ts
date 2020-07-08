@@ -1,10 +1,13 @@
 import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm'
 
 @Entity()
-export class ReactionManager {
+export class ReactionWatcher {
   @PrimaryGeneratedColumn()
   id: number
 
   @Column()
-  message: string
+  messageId: string
+
+  @Column()
+  emoji: string
 }

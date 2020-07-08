@@ -4,11 +4,13 @@ import path from 'path'
 
 import schema from './config'
 
+import { loadDatabase, Database } from './loadDatabase'
 import createClient from './createClient'
 
 declare global {
   interface Dependencies {
     config: EZ.LoadType<typeof schema>
+    db: Database
   }
 }
 
@@ -19,9 +21,11 @@ async function main () {
   const config = await schema.load({
     cwd: path.join(__dirname, '..')
   })
-  // const database = await loadDatabase()
 
-  client = await createClient({ config })
+  const db = await loadDatabase(config)
+
+  // Craete client
+  client = await createClient({ config, db })
 }
 
 process.on('SIGINT', async function () {
