@@ -24,7 +24,7 @@ async function main () {
 
   const db = await loadDatabase(config)
 
-  // Craete client
+  // Create client
   client = await createClient({ config, db })
 }
 

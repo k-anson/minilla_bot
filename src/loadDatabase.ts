@@ -3,14 +3,15 @@ import { createConnection, Connection, Repository } from 'typeorm'
 
 import schema from './config'
 import { ReactionWatcher } from './entities/ReactionWatcher'
+import { ReactionWatcherAction } from './entities/ReactionWatcherAction'
 
 export interface Database {
   connection: Connection
   reactionWatcherRepository: Repository<ReactionWatcher>
+  reactionWatcherActionRepository: Repository<ReactionWatcherAction>
 }
 
-//: Promise<Database>
-export async function loadDatabase (config: EZ.LoadType<typeof schema>) {
+export async function loadDatabase (config: EZ.LoadType<typeof schema>): Promise<Database> {
   const connection = await createConnection({
     type: 'mysql',
     host: config.DATABASE_HOST,
@@ -26,6 +27,7 @@ export async function loadDatabase (config: EZ.LoadType<typeof schema>) {
 
   return {
     connection,
-    reactionWatcherRepository: connection.getRepository(ReactionWatcher)
+    reactionWatcherRepository: connection.getRepository(ReactionWatcher),
+    reactionWatcherActionRepository: connection.getRepository(ReactionWatcherAction)
   }
 }

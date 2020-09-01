@@ -4,7 +4,10 @@ import EmojiRegex from 'emoji-regex'
 import loadCommands from './loadCommands'
 import { channelRegex, userRegex, guildEmojiRegex } from './utils/regex'
 
-export default async function ({ config }: Dependencies) {
+import { addUserToChannel } from './utils/reactionWatcherActions/channel'
+import { addUserToRole } from './utils/reactionWatcherActions/role'
+
+export default async function ({ config, db }: Dependencies) {
   const client = new Discord.Client()
   const commandMap = await loadCommands()
 
@@ -12,7 +15,7 @@ export default async function ({ config }: Dependencies) {
     if (client.user) {
       console.log(`Logged in as ${client.user.tag}`)
     } else {
-      console.log('Client ready without User')
+      console.log('Client ready without User?')
     }
   })
 
@@ -20,7 +23,7 @@ export default async function ({ config }: Dependencies) {
     // Ignore messages that are not from a guild
     if (!message.guild) return
 
-    const [startsWith, ...args] = message.content.split(' ')
+    const [startsWith, ...args] = message.content.split(/\s+/)
     // Pull out array of commands for startsWith string
     const commands = commandMap[startsWith.toLowerCase()] || []
     for (const command of commands) {
@@ -71,12 +74,12 @@ export default async function ({ config }: Dependencies) {
                 break
               case Discord.User:
                 const userRegexArray = userRegex.exec(parameter) || []
-                parsedParam = client.users.resolve(userRegexArray[1])
+                parsedParam = message.guild.members.resolve(userRegexArray[1])
                 break
-              case Discord.Emoji:
+              case Discord.GuildEmoji:
                 // Check guild emojis
                 const guildEmojiRegexArray = guildEmojiRegex.exec(parameter) || []
-                parsedParam = client.emojis.resolve(guildEmojiRegexArray[1])
+                parsedParam = message.guild.emojis.resolve(guildEmojiRegexArray[1])
                 // Check unicode emojis
                 const emojiRegex = EmojiRegex()
                 const parsedRegex = emojiRegex.exec(parameter)
@@ -94,7 +97,7 @@ export default async function ({ config }: Dependencies) {
           }
           if (!invalidCommand) {
             try {
-              await command.execute({ config })({ message, guild: message.guild }, parsedParams)
+              await command.execute({ config, db })({ message, guild: message.guild }, parsedParams)
             } catch (error) {
               console.error('Command execution error:', error)
             }
@@ -102,7 +105,7 @@ export default async function ({ config }: Dependencies) {
           }
         } else {
           try {
-            await command.execute({ config })({ message, guild: message.guild }, parsedParams)
+            await command.execute({ config, db })({ message, guild: message.guild }, parsedParams)
           } catch (error) {
             console.error('Command execution error:', error)
           }
@@ -110,6 +113,29 @@ export default async function ({ config }: Dependencies) {
         }
       }
     }
+  })
+
+  client.on('messageReactionAdd', async (reaction, user) =>  {
+    const reactionWatcher = await db.reactionWatcherRepository.findOne({
+      messageId: reaction.message.id,
+      emojiName: reaction.emoji.name
+    })
+    if (reactionWatcher?.reactionWatcherAction) {
+      const action = reactionWatcher.reactionWatcherAction
+      switch (action.type) {
+          case 'channel':
+            break
+          case 'role':
+            break
+      }
+      if (action.toggle) await reaction.users.remove(user.id)
+    }
+  })
+  client.on('messageReactionRemove', async (reaction, user) => {
+    // Find messageId in db
+      // Find emoji in db
+        // if minilla removed it - then ignore
+        // else - logic
   })
 
   await client.login(config.CLIENT_TOKEN)

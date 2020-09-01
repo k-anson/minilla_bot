@@ -1,4 +1,6 @@
-import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm'
+import { Entity, PrimaryGeneratedColumn, Column, OneToOne } from 'typeorm'
+
+import { ReactionWatcherAction } from './ReactionWatcherAction'
 
 @Entity()
 export class ReactionWatcher {
@@ -9,5 +11,10 @@ export class ReactionWatcher {
   messageId: string
 
   @Column()
-  emoji: string
+  emojiName: string
+
+  @OneToOne(type => ReactionWatcherAction, reactionWatcherAction => reactionWatcherAction.reactionWatcher, {
+    eager: true
+  })
+  reactionWatcherAction: ReactionWatcherAction
 }
